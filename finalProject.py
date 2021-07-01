@@ -99,8 +99,9 @@ def choose_background_color():
 # #     ax.legend([injured], [killed], loc=9)
 #     st.pyplot(fig)
 def barchart():
-    bar_df = data[['ZIP CODE', 'PERSONS INJURED']].dropna().groupby('ZIP CODE').count('PERSONS INJURED')
-    print(bar_df)
+    pass
+#     bar_df = data[['ZIP CODE', 'PERSONS INJURED']].dropna().groupby('ZIP CODE').count('PERSONS INJURED')
+#     print(bar_df)
     # colors = {"red": "r", "green": "g", "yellow": "y", "blue": "b", "cyan": "c"}
     # color_names = list(colors.keys())
     #
