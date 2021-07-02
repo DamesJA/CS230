@@ -11,8 +11,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 import pydeck as pdk
+import csv
 
-data = pd.read_csv('NYC_vehicle_collisions_data.csv', encoding="utf-8")
+name_of_file = 'NYC_vehicle_collisions_data.csv'
+data = pd.read_csv(name_of_file, encoding="utf-8")
 data.rename(columns=({'LATITUDE': 'latitude', 'LONGITUDE': 'longitude'}), inplace=True)
 
 
@@ -28,9 +30,11 @@ def welcome_statement():
         message += 'You are probably very advanced at streamlit and have been working with it for several years'
     st.write(f'Hi {name}, {message}')
 
+
+# this function chooses the background color and implements it into the code
 def choose_background_color():
-    # SOMETHING COOL THAT I MADE!
-    colors = {'green': '#00bd00', 'darkpink': '#E75480', 'brown': '#964B00', 'cobalt': '#0047ab'}
+    # SOMETHING COOL THAT I MADE! I edited the the style using css and python (proud of it because I figured it out on my own)
+    colors = {'brown': '#964B00', 'green': '#00bd00', 'darkpink': '#E75480', 'cobalt': '#0047ab'}
     colors_list = list(colors.keys())
     color = st.sidebar.radio('background colors', colors_list)
     color_selection = colors[color]
@@ -46,97 +50,14 @@ def choose_background_color():
     )
 
 
-# taking out all rows that don't have a proper longitude and latitude
-# for i in range(0, len(data)):
-#     if type(data['longitude']) != float:
-
-
-# def query_1():
-#     # array with all the street names with no duplicates
-#     street_names = list(dict.fromkeys(data['ON STREET NAME']))
-#     for i in range(0, len(street_names) - 1):
-#         # taking out the street names that are nan
-#         if type(street_names[i]) == float:
-#             street_names.pop(i)
-#     # print(street_names)
-#
-#     months = []
-#     years = []
-#     for i in range(0, len(data)):
-#         if int(data['DATE'][i].split('/')[0]) not in months:
-#             months.append(int(data['DATE'][i].split('/')[0]))
-#         if int(data['DATE'][i].split('/')[2]) not in years:
-#             years.append(int(data['DATE'][i].split('/')[2]))
-#     # print(months)
-#     # print(years)
-#
-#     street_selection = st.selectbox('Select a street name', street_names)
-#     month_selection = st.slider('Select a month', min(months), max(months), 1)
-#     year_selection = st.slider('Select a year', min(years), max(years))
-#
-#     # selected_df = data[data['ON STREET NAME'] == street_selection and data['DATE'].split('/')[0] == month_selection and data['DATE'].split('/')[2] == year_selection]
-#     selected_df_1 = data[data['ON STREET NAME'] == street_selection]
-#     selected_df_2 = selected_df_1[data['PERSONS INJURED'] >= 1]
-#     print(selected_df_2)
-#
-#     # and data['PEDESTRIANS INJURED'] >= 1 and data['CYCLISTS INJURED'] >= 1 and data['PERSONS INJURED'] >= 1
-#
-#     # selected_df_2 = selected_df_1[selected_df_1['DATE'].str.split('/')[0] == month_selection]
-#     # selected_df_3 = selected_df_2[selected_df_2['DATE'].str.split('/')[2] == year_selection]
-#
-#     # and data['Month'] == data[month_selection] and data['Year'] == data[year_selection]
-#     # print(selected_df)
-#
-#     dictionary = {'PERSONS INJURED': sum(selected_df_1['PERSONS INJURED']),
-#                   'PEDESTRIANS INJURED': sum(selected_df_1['PEDESTRIANS INJURED']),
-#                   'CYCLISTS INJURED': sum(selected_df_1['CYCLISTS INJURED']),
-#                   'MOTORISTS INJURED': sum(selected_df_1['PERSONS INJURED'])}
-#
-#     fig, ax = plt.subplots()
-#     ax.bar(dictionary.keys(), dictionary.values())
-#     # plt.xlabel('amount of pepo')
-#     # plt.ylabel(f'log of sum')
-# #     ax.legend([injured], [killed], loc=9)
-#     st.pyplot(fig)
-def barchart():
-    pass
-#     bar_df = data[['ZIP CODE', 'PERSONS INJURED']].dropna().groupby('ZIP CODE').count('PERSONS INJURED')
-#     print(bar_df)
-    # colors = {"red": "r", "green": "g", "yellow": "y", "blue": "b", "cyan": "c"}
-    # color_names = list(colors.keys())
-    #
-    # def bar(values, color1=colors["cyan"]):
-    #     p = values
-    #     x = range(4)
-    #     plt.bar(x, p, color=color1)
-    #     return plt
-    #
-    # st.title('Bar Chart')
-    # st.sidebar.header('Inputs')
-    #
-    # value1 = st.sidebar.slider("Value 1", 1, 50)
-    # value2 = st.sidebar.slider("Value 2", 1, 50)
-    # value3 = st.sidebar.slider("Value 3", 1, 50)
-    # value4 = st.sidebar.slider("Value 4", 1, 50)
-    #
-    # values = [value1, value2, value3, value4]
-    #
-    # color1 = st.sidebar.radio('Color:', color_names)
-    #
-    # st.pyplot(bar(values, colors[color1]))
-    # st.sidebar.table(values)
-    # if st.sidebar.button("Press Me"):
-    #     st.balloons()
-
-
-def query_1():
+# This function creates the map that is in the data
+def map_query():
     vehicle_1_types = list(dict.fromkeys(data['VEHICLE 1 TYPE'].dropna()))
     vehicle_1_type = st.selectbox('vehicle type', vehicle_1_types)
     dfv = data[(data['VEHICLE 1 TYPE'] == vehicle_1_type) | (data['VEHICLE 2 TYPE'] == vehicle_1_type)]
 
     dfv_2 = dfv[['latitude', 'longitude']].dropna().copy()
     st.dataframe(dfv_2)
-    # print(dfv_2)
 
     st.title("Locations of Collision in New York")
     st.write("Simple Map:")
@@ -172,11 +93,47 @@ def query_1():
     st.pydeck_chart(map)
 
 
+# this function creates the bar chart
+def barchart_query():
+    persons_death_count_by_zip = {}
+    with open(name_of_file, mode='r') as csv_file:
+        zipcode_data = csv.DictReader(csv_file)
+        for row in zipcode_data:
+            zipcode = row['ZIP CODE']
+            injured_num = row['PERSONS INJURED']
+            if zipcode != 0:
+                if zipcode not in persons_death_count_by_zip.keys():
+                    persons_death_count_by_zip[zipcode] = eval(injured_num)
+                else:
+                    persons_death_count_by_zip[zipcode] += eval(injured_num)
+
+    # making a list of all the zip codes in int form
+    zipcodes_int_form = []
+    for zipcode in list(data['ZIP CODE'].dropna()):
+        zipcodes_int_form.append(int(zipcode))
+    # these sliders allow the user to choose options where they can choose which zipcodes they want to show
+    zip1 = st.sidebar.selectbox('Zip Code 1', zipcodes_int_form)
+    zip2 = st.sidebar.selectbox('Zip Code 2', zipcodes_int_form)
+    zip3 = st.sidebar.selectbox('Zip Code 3', zipcodes_int_form)
+    x = [zip1, zip2, zip3]
+    y = [persons_death_count_by_zip[str(zip1)], persons_death_count_by_zip[str(zip2)],
+         persons_death_count_by_zip[str(zip3)]]
+
+    fig, ax = plt.subplots()
+    ax.yaxis.grid(linestyle='dashed', zorder=0)
+    ax.bar(x, y, color=['black', 'red', 'green'])
+    ax.set_title("injured by zipcode")
+    ax.set_xlabel('Zipcodes')
+    ax.set_ylabel('Injured_Num')
+    st.write(fig)
+
+
+# this is the main function that starts the execution of the program
 def main():
     choose_background_color()
     welcome_statement()
-    barchart()
-    query_1()
+    map_query()
+    barchart_query()
 
 
 main()
