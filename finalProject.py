@@ -1,10 +1,15 @@
 """
 Name: Damian Amante
 CS230: Section 2F
-Data: NYC vehicle Collisions
-URL:
+Data: NYC Vehicle Collisions
+URL: https://share.streamlit.io/damesja/cs230/main/finalProject.py
 
 Description:
+ - The first thing I have in my program is a welcome statement
+ - The second thing in my program is adding a function to choose color of the background. This I am proud of that I 
+ figured out because I had to edit the html
+ - I then created a map that shows the location of all the collisions (displayed with dots)
+ - I then created a bar chart that shows the "persons injured" in different zip codes in NY
 """
 import numpy as np
 import pandas as pd
@@ -31,13 +36,18 @@ def welcome_statement():
     st.write(f'Hi {name}, {message}')
 
 
+def choose_color(colors_dict, color):
+    color_code = colors_dict[color]
+    return color_code
+
+
 # this function chooses the background color and implements it into the code
 def choose_background_color():
     # SOMETHING COOL THAT I MADE! I edited the the style using css and python (proud of it because I figured it out on my own)
     colors = {'brown': '#964B00', 'green': '#00bd00', 'darkpink': '#E75480', 'cobalt': '#0047ab'}
     colors_list = list(colors.keys())
     color = st.sidebar.radio('background colors', colors_list)
-    color_selection = colors[color]
+    color_selection = choose_color(colors, color)
     st.markdown(
         f"""
         <style>
